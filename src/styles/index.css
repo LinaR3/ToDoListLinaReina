@@ -1,13 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Modak&display=swap');
 
-/* El resto de tus estilos CSS */
-
-/* Asegúrate de aplicar la fuente en el título */
-/* .alguna-clase-del-titulo { font-family: 'Modak', cursive; } */
-
-/* Efecto de sombra  */
 .fa-xmark {
-    /* Animación de "latido" ligero */
+
     transition: transform 0.15s ease-in-out;
 }
 
@@ -15,13 +9,11 @@
     transform: scale(1.2);
 }
 
-/* Efecto visual al hacer clic */
 .form-control[style*="#C3B1E1"]:active {
     transform: scale(0.99);
     box-shadow: none !important;
 }
 
-/* El input al enfocarse */
 input:focus {
     box-shadow: 0 0 0 0.25rem #FFC9E3 !important; /* Resplandor suave rosa pastel */
     border-color: #FF91AE !important; /* Borde rosa chicle */

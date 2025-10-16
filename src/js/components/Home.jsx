@@ -31,7 +31,7 @@ const customStyles = {
 		cursor: 'pointer',
 		alignItems: 'center',
 	},
-	// Estilo de la tarea completada
+	
 	taskItemCompleted: {
 		backgroundColor: '#EAEAEA',
 		textDecoration: 'line-through',
