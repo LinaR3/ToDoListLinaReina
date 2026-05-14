@@ -1,30 +1,42 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&family=DM+Sans:wght@300;400;500&display=swap');
 
-:root {
-  --pink: #FF91AE;
-  --pink-light: #FFC9E3;
-  --purple: #936ED4;
-  --purple-light: #C3B1E1;
-  --purple-pale: #F5F0FF;
-  --cream: #FCF8FF;
-  --text: #3D2B5E;
-  --text-muted: #9B8AC4;
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-input:focus {
-  border-color: var(--purple-light) !important;
-  box-shadow: 0 0 0 3px rgba(195, 177, 225, 0.25) !important;
+html, body {
+  height: 100%;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+/* Neutraliza el body de Bootstrap */
+body {
+  margin: 0 !important;
+  padding: 32px 16px !important;
+  min-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background-color: #EDEAE3 !important;
+  background-image: radial-gradient(circle, #C8C4BC 1px, transparent 1px) !important;
+  background-size: 22px 22px !important;
+  font-family: 'DM Sans', sans-serif !important;
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+#root {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 
-.fa-xmark { transition: transform 0.15s ease-in-out; }
-.fa-xmark:hover { transform: scale(1.2); }
+input:focus,
+input:focus-visible {
+  border-color: #888780 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+button:focus {
+  box-shadow: none !important;
+  outline: none !important;
+}
