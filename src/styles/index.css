@@ -1,20 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Modak&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
 
-.fa-xmark {
-
-    transition: transform 0.15s ease-in-out;
-}
-
-.fa-xmark:hover {
-    transform: scale(1.2);
-}
-
-.form-control[style*="#C3B1E1"]:active {
-    transform: scale(0.99);
-    box-shadow: none !important;
+:root {
+  --pink: #FF91AE;
+  --pink-light: #FFC9E3;
+  --purple: #936ED4;
+  --purple-light: #C3B1E1;
+  --purple-pale: #F5F0FF;
+  --cream: #FCF8FF;
+  --text: #3D2B5E;
+  --text-muted: #9B8AC4;
 }
 
 input:focus {
-    box-shadow: 0 0 0 0.25rem #FFC9E3 !important; /* Resplandor suave rosa pastel */
-    border-color: #FF91AE !important; /* Borde rosa chicle */
+  border-color: var(--purple-light) !important;
+  box-shadow: 0 0 0 3px rgba(195, 177, 225, 0.25) !important;
 }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fa-xmark { transition: transform 0.15s ease-in-out; }
+.fa-xmark:hover { transform: scale(1.2); }

@@ -2,131 +2,150 @@ import React, { useState, useEffect } from "react";
 import { todoApi } from "../api/todoApi";
 import Task from "../components/Task";
 
-const customStyles = {
-    appContainer: {
-        backgroundColor: '#FFC9E3',
-        padding: '30px',
-        borderRadius: '20px',
-        boxShadow: '0 10px 20px rgba(0, 0, 0, 0.15)',
-        border: '4px solid #C3B1E1',
-    },
-    title: {
-        color: '#936ED4',
-        textShadow: '2px 2px #FF91AE',
-        fontFamily: 'Modak, cursive',
-        fontSize: '4rem',
-    },
-    counterFooter: {
-        backgroundColor: '#FCF8FF',
-        borderBottomLeftRadius: '15px',
-        borderBottomRightRadius: '15px',
-        fontSize: '14px',
-        color: '#936ED4',
-        padding: '10px 15px',
-        border: '1px solid #C3B1E1',
-        fontWeight: 'bold',
-    },
-};
-
 const Home = () => {
-    const [newTask, setNewTask] = useState("");
-    const [tasks, setTasks] = useState([]);
+  const [newTask, setNewTask] = useState("");
+  const [tasks, setTasks] = useState([]);
 
-    // Función para refrescar la lista desde el servidor
-    const loadTasks = async () => {
-        try {
-            const data = await todoApi.getTodos();
-            setTasks(data);
-        } catch (error) {
-            console.error("Error cargando tareas:", error);
-        }
-    };
+  const loadTasks = async () => {
+    try {
+      const data = await todoApi.getTodos();
+      setTasks(data);
+    } catch (e) { console.error(e); }
+  };
 
-    // Cargar al inicio
-    useEffect(() => {
-        loadTasks();
-    }, []);
+  useEffect(() => { loadTasks(); }, []);
 
-    const handleAddTask = async () => {
-        if (newTask.trim() !== "") {
-            try {
-                await todoApi.addTask(newTask.trim());
-                setNewTask("");
-                await loadTasks(); // Sincronizar con el servidor
-            } catch (error) {
-                console.error("Error al añadir:", error);
-            }
-        }
-    };
+  const handleAdd = async () => {
+    if (!newTask.trim()) return;
+    try {
+      await todoApi.addTask(newTask.trim());
+      setNewTask("");
+      await loadTasks();
+    } catch (e) { console.error(e); }
+  };
 
-    const handleDelete = async (id) => {
-        try {
-            await todoApi.deleteTask(id);
-            await loadTasks(); // Sincronizar con el servidor
-        } catch (error) {
-            console.error("Error al eliminar:", error);
-        }
-    };
+  const handleToggle = async (id) => {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+    // Optimistic update
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, is_done: !t.is_done } : t));
+    try {
+      await todoApi.updateTask(id, { label: task.label, is_done: !task.is_done });
+    } catch (e) { await loadTasks(); }
+  };
 
-    const handleClearAll = async () => {
-        try {
-            await todoApi.deleteAll();
-            setTasks([]); // Limpiar localmente mientras se recrea el usuario
-            await loadTasks();
-        } catch (error) {
-            console.error("Error al limpiar todo:", error);
-        }
-    };
+  const handleDelete = async (id) => {
+    try {
+      await todoApi.deleteTask(id);
+      await loadTasks();
+    } catch (e) { console.error(e); }
+  };
 
-    const pendingCount = tasks.filter(t => !t.is_done).length;
+  const handleClearAll = async () => {
+    try {
+      await todoApi.deleteAll();
+      setTasks([]);
+      await loadTasks();
+    } catch (e) { console.error(e); }
+  };
 
-    return (
-        <div className="text-center" style={{ paddingTop: '50px', backgroundColor: '#FCF8FF', minHeight: '100vh' }}>
-            <div className="col-lg-4 col-md-6 col-sm-8 mx-auto" style={customStyles.appContainer}>
-                <h1 className="text-center mt-3 mb-4" style={customStyles.title}>
-                    My 🐰 List 🥕
-                </h1>
+  const pending = tasks.filter(t => !t.is_done).length;
+  const progress = tasks.length > 0
+    ? Math.round(((tasks.length - pending) / tasks.length) * 100)
+    : 0;
 
-                <div className="d-flex mb-3">
-                    <input
-                        type="text"
-                        className="form-control p-3"
-                        placeholder="¿Qué necesita el conejito?"
-                        value={newTask}
-                        onChange={(e) => setNewTask(e.target.value)}
-                        onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
-                    />
-                </div>
+  return (
+    <div style={{ minHeight: "100vh", background: "var(--cream)", display: "flex",
+      flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
 
-                {tasks.length > 0 ? (
-                    tasks.map(task => (
-                        <Task 
-                            key={task.id} 
-                            task={task} 
-                            onDelete={() => handleDelete(task.id)} 
-                        />
-                    ))
-                ) : (
-                    <div className="form-control mt-2 p-3 text-body-tertiary" style={{ backgroundColor: '#FCF8FF', border: '1px dashed #C3B1E1', borderRadius: '15px' }}>
-                        <p className="text-center m-0">¡No hay tareas! Tu 🐰 está muy feliz. ✨</p>
-                    </div>
-                )}
+      {/* Hero */}
+      <div style={{ textAlign: "center", marginBottom: "28px" }}>
+        <span style={{ fontSize: "52px", display: "block", animation: "float 3s ease-in-out infinite" }}>🐰</span>
+        <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "2.6rem",
+          color: "var(--text)", letterSpacing: "-1px", marginTop: "8px", lineHeight: "1.1" }}>
+          My <span style={{ color: "var(--purple)" }}>List</span>
+        </h1>
+        <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "6px" }}>
+          Tareas de Lina Reina
+        </p>
+      </div>
 
-                <div className="mt-3 d-flex justify-content-between align-items-center" style={customStyles.counterFooter}>
-                    <p className="m-0">
-                        {pendingCount === 0 ? "¡Todo listo! 🎉" : `${pendingCount} pendiente(s)`}
-                    </p>
-                    <button 
-                        className="btn btn-sm btn-outline-danger" 
-                        onClick={handleClearAll}
-                        style={{ borderRadius: '10px', fontSize: '12px' }}
-                    >
-                        Limpiar Todo
-                    </button>
-                </div>
-            </div>
+      {/* Card */}
+      <div style={{ width: "100%", maxWidth: "420px", background: "#fff", borderRadius: "24px",
+        boxShadow: "0 4px 32px rgba(147,110,212,0.10)", padding: "24px",
+        border: "1.5px solid #EDE8FA" }}>
+
+        {/* Barra de progreso */}
+        {tasks.length > 0 && (
+          <div style={{ height: "4px", background: "#EDE8FA", borderRadius: "99px",
+            marginBottom: "20px", overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${progress}%`,
+              background: "linear-gradient(90deg, var(--purple-light), var(--purple))",
+              borderRadius: "99px", transition: "width 0.4s cubic-bezier(.4,0,.2,1)" }} />
+          </div>
+        )}
+
+        {/* Input */}
+        <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+          <input
+            type="text"
+            placeholder="Nueva tarea..."
+            value={newTask}
+            onChange={e => setNewTask(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleAdd()}
+            style={{ flex: 1, border: "1.5px solid #EDE8FA", borderRadius: "14px",
+              padding: "12px 16px", fontSize: "15px", fontFamily: "'DM Sans', sans-serif",
+              color: "var(--text)", background: "var(--purple-pale)", outline: "none" }}
+          />
+          <button onClick={handleAdd}
+            style={{ background: "var(--purple)", border: "none", borderRadius: "14px",
+              width: "46px", height: "46px", display: "flex", alignItems: "center",
+              justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+              stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
         </div>
-    );
+
+        {/* Lista */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {tasks.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "28px 0", color: "var(--text-muted)", fontSize: "14px" }}>
+              <span style={{ display: "block", fontSize: "38px", marginBottom: "8px",
+                animation: "float 3s ease-in-out infinite" }}>🥕</span>
+              ¡Sin tareas! Agrega una arriba.
+            </div>
+          ) : (
+            tasks.map(task => (
+              <Task key={task.id} task={task}
+                onDelete={() => handleDelete(task.id)}
+                onToggle={() => handleToggle(task.id)} />
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
+          marginTop: "16px", paddingTop: "16px", borderTop: "1.5px solid #EDE8FA" }}>
+          <p style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: 500 }}>
+            {pending === 0 && tasks.length === 0
+              ? "Todo listo 🎉"
+              : pending === 0
+                ? <><strong style={{ color: "var(--purple)" }}>¡Todo listo!</strong> 🎉</>
+                : <><strong style={{ color: "var(--purple)" }}>{pending}</strong> pendiente{pending !== 1 ? "s" : ""}</>
+            }
+          </p>
+          <button onClick={handleClearAll}
+            style={{ background: "none", border: "1.5px solid #FFDDE8", borderRadius: "10px",
+              padding: "6px 14px", fontSize: "12px", fontFamily: "'DM Sans', sans-serif",
+              color: "var(--pink)", cursor: "pointer", fontWeight: 500 }}>
+            Limpiar todo
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Home;

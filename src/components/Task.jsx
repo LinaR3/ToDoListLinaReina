@@ -1,79 +1,73 @@
 import React, { useState } from "react";
 
-// Estilos específicos para la tarea 
-const taskStyles = {
-    taskItemBase: {
-        backgroundColor: '#FCF8FF',
-        border: 'none',
-        borderRadius: '10px',
-        marginBottom: '5px',
-        borderLeft: '8px solid #C3B1E1',
-        transition: 'all 0.3s',
-        cursor: 'pointer',
-        alignItems: 'center',
-        display: 'flex',
-    },
-    taskItemCompleted: {
-        backgroundColor: '#EAEAEA',
-        textDecoration: 'line-through',
-        opacity: 0.6,
-        borderLeft: '8px solid #FF91AE',
-    },
-    taskText: {
-        color: '#4A4D8F',
-        marginBottom: '0',
-        flexGrow: 1,
-        padding: '1rem',
-        textAlign: 'left'
-    },
-    deleteIcon: {
-        color: '#FF91AE',
-        cursor: 'pointer',
-        fontSize: '1.2em',
-        paddingRight: '15px',
-        transition: 'transform 0.2s',
-    },
-};
-
 const Task = ({ task, onDelete, onToggle }) => {
-    const [isHovered, setIsHovered] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
-    // Definir el estilo dinámico basado en el estado
-    const itemStyle = task.is_done 
-        ? { ...taskStyles.taskItemBase, ...taskStyles.taskItemCompleted }
-        : isHovered
-            ? { ...taskStyles.taskItemBase, borderLeftColor: '#FF91AE', boxShadow: '0 2px 5px rgba(0, 0, 0, 0.05)' }
-            : taskStyles.taskItemBase;
+  return (
+    <div
+      style={{
+        display: "flex", alignItems: "center", gap: "12px",
+        background: task.is_done ? "#F0EDF8" : "var(--purple-pale)",
+        border: `1.5px solid ${hovered ? "var(--purple-light)" : "#EDE8FA"}`,
+        borderRadius: "14px", padding: "12px 14px",
+        transition: "all 0.2s", animation: "slideIn 0.25s ease",
+        opacity: task.is_done ? 0.7 : 1,
+        boxShadow: hovered ? "0 2px 12px rgba(147,110,212,0.10)" : "none",
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Checkbox circular */}
+      <div
+        onClick={onToggle}
+        style={{
+          width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
+          border: `2px solid ${task.is_done ? "var(--purple)" : "var(--purple-light)"}`,
+          background: task.is_done ? "var(--purple)" : "#fff",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", transition: "all 0.2s",
+        }}
+      >
+        {task.is_done && (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </div>
 
-    return (
-        <div
-            className="form-control mt-2 p-0"
-            style={itemStyle}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-        >
-            {/* Texto de la tarea */}
-            <p
-                className="fs-5 fw-light"
-                style={taskStyles.taskText}
-                onClick={onToggle}
-            >
-                {task.label}
-            </p>
+      {/* Texto */}
+      <span
+        onClick={onToggle}
+        style={{
+          flex: 1, fontSize: "15px", cursor: "pointer", lineHeight: "1.4",
+          color: task.is_done ? "var(--purple-light)" : "var(--text)",
+          textDecoration: task.is_done ? "line-through" : "none",
+          transition: "color 0.2s", wordBreak: "break-word",
+        }}
+      >
+        {task.label}
+      </span>
 
-            {/* Icono de eliminar - se muestra según el hover */}
-            {isHovered && (
-                <i
-                    className="fa-solid fa-xmark"
-                    style={taskStyles.deleteIcon}
-                    onClick={(e) => {
-                        e.stopPropagation(); // Evita que al borrar se marque como completada
-                        onDelete();
-                    }}
-                ></i>
-            )}
-        </div>
-    );
+      {/* Botón borrar */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+        style={{
+          width: "30px", height: "30px", border: "none", background: "none",
+          cursor: "pointer", borderRadius: "8px", flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          opacity: hovered ? 1 : 0, transition: "opacity 0.2s, background 0.2s",
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = "rgba(255,145,174,0.15)"}
+        onMouseLeave={e => e.currentTarget.style.background = "none"}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="#FF91AE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+  );
 };
 
 export default Task;
