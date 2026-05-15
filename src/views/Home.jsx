@@ -205,7 +205,7 @@ const Home = () => {
             <CatIcon />
           </div>
           <div>
-            <h1 style={styles.title}>Tasks</h1>
+            <h1 style={styles.title}>SomeTasks</h1>
             <p style={styles.subtitle}>Lista de tareas de tu mascota</p>
           </div>
         </div>
