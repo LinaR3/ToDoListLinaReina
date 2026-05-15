@@ -6,7 +6,7 @@ import './styles/index.css'
 import Home from "./views/Home"
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <Home />
-  </React.StrictMode>,
+    <React.StrictMode>
+        <Home />
+    </React.StrictMode>,
 )
