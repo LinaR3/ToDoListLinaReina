@@ -1,33 +1,96 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 
-const Task = ({ task, onDelete, onToggle }) => {
-    const [hovered, setHovered] = useState(false);
+const Task = ({ task, onDelete, onToggle, onEdit, onDragStart, onDragOver, onDrop, onDragEnd }) => {
+    const [editing, setEditing] = useState(false);
+    const [editValue, setEditValue] = useState(task.label);
+    const [isDragging, setIsDragging] = useState(false);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const inputRef = useRef(null);
+
+    // ─── Edición inline ──────────────────────────────────
+    const handleDoubleClick = () => {
+        if (task.is_done) return;
+        setEditing(true);
+        setEditValue(task.label);
+        setTimeout(() => inputRef.current?.focus(), 0);
+    };
+
+    const handleEditConfirm = () => {
+        if (editValue.trim() && editValue.trim() !== task.label) {
+            onEdit(task.id, editValue.trim());
+        }
+        setEditing(false);
+    };
+
+    const handleEditKeyDown = (e) => {
+        if (e.key === "Enter") handleEditConfirm();
+        if (e.key === "Escape") {
+            setEditValue(task.label);
+            setEditing(false);
+        }
+    };
+
+    // ─── Drag & Drop ─────────────────────────────────────
+    const handleDragStart = (e) => {
+        setIsDragging(true);
+        onDragStart(task.id);
+        e.dataTransfer.effectAllowed = "move";
+    };
+
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragOver(true);
+        onDragOver(task.id);
+    };
+
+    const handleDragLeave = () => {
+        setIsDragOver(false);
+    };
+
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        onDrop(task.id);
+    };
+
+    const handleDragEnd = () => {
+        setIsDragging(false);
+        setIsDragOver(false);
+        onDragEnd();
+    };
+
+    const itemClasses = [
+        "task-item",
+        "d-flex align-items-center gap-2",
+        task.is_done ? "done" : "",
+        isDragging ? "dragging" : "",
+        isDragOver ? "drag-over" : "",
+    ].filter(Boolean).join(" ");
 
     return (
         <div
-            className="d-flex align-items-center gap-2"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            style={{
-                background: task.is_done ? "#F3F1ED" : "#FAFAF8",
-                border: `1.5px solid ${hovered && !task.is_done ? "#B4B2A9" : "#DEDAD2"}`,
-                borderRadius: "8px",
-                padding: "11px 12px",
-                transition: "border-color 0.18s",
-            }}
+            className={itemClasses}
+            draggable
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onDragEnd={handleDragEnd}
         >
+            {/* Drag handle */}
+            <span className="task-drag-handle" aria-hidden="true">
+                <svg width="12" height="16" viewBox="0 0 12 16" fill="currentColor">
+                    <circle cx="4" cy="3" r="1.5"/>
+                    <circle cx="8" cy="3" r="1.5"/>
+                    <circle cx="4" cy="8" r="1.5"/>
+                    <circle cx="8" cy="8" r="1.5"/>
+                    <circle cx="4" cy="13" r="1.5"/>
+                    <circle cx="8" cy="13" r="1.5"/>
+                </svg>
+            </span>
+
             {/* Checkbox */}
-            <div
-                onClick={onToggle}
-                style={{
-                    width: "20px", height: "20px",
-                    borderRadius: "5px",
-                    border: `1.5px solid ${task.is_done ? "#2C2C2A" : "#C8C4BC"}`,
-                    background: task.is_done ? "#2C2C2A" : "#fff",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    cursor: "pointer", flexShrink: 0, transition: "all 0.18s",
-                }}
-            >
+            <div className="task-check" onClick={() => onToggle(task.id)}>
                 {task.is_done && (
                     <svg width="11" height="11" viewBox="0 0 24 24"
                         fill="none" stroke="#FAFAF8"
@@ -37,39 +100,35 @@ const Task = ({ task, onDelete, onToggle }) => {
                 )}
             </div>
 
-            {/* Label */}
-            <span
-                onClick={onToggle}
-                style={{
-                    flex: 1, fontSize: "14px",
-                    color: task.is_done ? "#B4B2A9" : "#2C2C2A",
-                    textDecoration: task.is_done ? "line-through" : "none",
-                    lineHeight: "1.4", wordBreak: "break-word",
-                    cursor: "pointer", userSelect: "none",
-                    transition: "color 0.18s",
-                }}
-            >
-                {task.label}
-            </span>
+            {/* Label o input de edición */}
+            {editing ? (
+                <input
+                    ref={inputRef}
+                    className="task-edit-input"
+                    value={editValue}
+                    onChange={e => setEditValue(e.target.value)}
+                    onBlur={handleEditConfirm}
+                    onKeyDown={handleEditKeyDown}
+                />
+            ) : (
+                <span
+                    className="task-label"
+                    onDoubleClick={handleDoubleClick}
+                    onClick={() => onToggle(task.id)}
+                    title={task.is_done ? "" : "Doble click para editar"}
+                >
+                    {task.label}
+                </span>
+            )}
 
             {/* Botón eliminar */}
             <button
-                onClick={(e) => { e.stopPropagation(); onDelete(); }}
-                onMouseEnter={e => e.currentTarget.style.background = "#E8E5DF"}
-                onMouseLeave={e => e.currentTarget.style.background = "none"}
-                style={{
-                    width: "28px", height: "28px",
-                    border: "none", background: "none",
-                    cursor: "pointer", borderRadius: "6px",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    opacity: hovered ? 1 : 0,
-                    transition: "opacity 0.15s, background 0.15s",
-                    flexShrink: 0,
-                }}
+                className="task-delete-btn"
+                onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
                 aria-label="Eliminar tarea"
             >
                 <svg width="14" height="14" viewBox="0 0 24 24"
-                    fill="none" stroke="#888780"
+                    fill="none" stroke="currentColor"
                     strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
